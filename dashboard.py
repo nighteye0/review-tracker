@@ -189,7 +189,18 @@ with st.sidebar:
         st.divider()
         st.markdown("**Tracked Apps**")
         for a in apps:
-            st.markdown(f"<div style='font-size:0.8rem; color:rgba(255,255,255,0.5); padding:0.3rem 0; border-bottom:1px solid rgba(255,255,255,0.05);'>📱 {a[1]}</div>", unsafe_allow_html=True)
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown(f"<div style='font-size:0.8rem; color:rgba(255,255,255,0.5); padding:0.4rem 0;'>📱 {a[1]}</div>", unsafe_allow_html=True)
+            with col2:
+                if st.button("↻", key=f"rescrape_{a[0]}", help=f"Re-scrape {a[1]}"):
+                    with st.spinner(f"Re-scraping..."):
+                        try:
+                            app_name, count = scrape_and_save(a[0], max_reviews)
+                            st.success(f"✓ {count} new reviews for {app_name}")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error: {e}")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

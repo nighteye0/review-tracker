@@ -4,6 +4,7 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 from datetime import datetime
+from google_play_scraper import search
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -13,31 +14,16 @@ st.set_page_config(page_title="AppIntel", page_icon="🕵️", layout="wide")
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; background-color: #0a0a0f; color: #e8e6f0; }
+html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
 #MainMenu, footer, header {visibility: hidden;}
-.stApp { background: #0a0a0f; background-image: radial-gradient(ellipse at 20% 20%, rgba(99,55,255,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(255,55,130,0.06) 0%, transparent 50%); }
-[data-testid="stSidebar"] { background: #0f0f1a !important; border-right: 1px solid rgba(255,255,255,0.06); }
-[data-testid="stSidebar"] * { color: #e8e6f0 !important; }
-.stTextInput input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px !important; color: #fff !important; }
-.stTextInput input:focus { border-color: #6337ff !important; box-shadow: 0 0 0 2px rgba(99,55,255,0.2) !important; }
-.stTextInput input::placeholder { color: rgba(255,255,255,0.3) !important; }
-.stButton button { background: linear-gradient(135deg, #6337ff 0%, #9b59ff 100%) !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important; transition: all 0.2s ease !important; }
-.stButton button:hover { transform: translateY(-1px) !important; box-shadow: 0 8px 24px rgba(99,55,255,0.4) !important; }
-.stSelectbox [data-baseweb="select"] { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px !important; }
-.stSelectbox [data-baseweb="select"] * { color: #e8e6f0 !important; background: #0f0f1a !important; }
-[data-testid="stMetric"] { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.07) !important; border-radius: 12px !important; padding: 1.2rem 1.5rem !important; }
-[data-testid="stMetricLabel"] { color: rgba(255,255,255,0.5) !important; font-size: 0.75rem !important; text-transform: uppercase !important; letter-spacing: 0.08em !important; }
-[data-testid="stMetricValue"] { color: #fff !important; font-family: 'Syne', sans-serif !important; font-size: 1.8rem !important; font-weight: 700 !important; }
-hr { border-color: rgba(255,255,255,0.07) !important; }
-.stSuccess { background: rgba(0,200,100,0.1) !important; border: 1px solid rgba(0,200,100,0.2) !important; border-radius: 8px !important; }
-.stInfo { background: rgba(99,55,255,0.1) !important; border: 1px solid rgba(99,55,255,0.2) !important; border-radius: 8px !important; }
 .review-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 0.8rem; }
 .review-stars { color: #f5a623; font-size: 0.8rem; margin-bottom: 0.4rem; }
-.review-text { color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; }
+.review-text { font-size: 0.85rem; line-height: 1.5; }
 .rating-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.rating-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+.rating-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
 .rating-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #6337ff, #9b59ff); }
-.report-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 2rem; margin-top: 1rem; }
+.report-container { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 2rem; margin-top: 1rem; }
+.search-result { padding: 0.7rem 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -69,6 +55,13 @@ def get_reviews(app_id):
         conn.close()
         return rows
     except:
+        return []
+
+def search_apps(query):
+    try:
+        results = search(query, lang='en', country='us', n_hits=5)
+        return [(r['appId'], r['title'], r.get('score', 0), r.get('installs', '')) for r in results]
+    except Exception as e:
         return []
 
 def scrape_and_save(app_id, max_reviews):
@@ -107,52 +100,67 @@ def ask_groq(prompt):
 init_db()
 
 with st.sidebar:
-    st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:1.4rem;font-weight:800;color:#fff;'>App<span style=\"color:#6337ff\">Intel</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:1.4rem;font-weight:800;'>App<span style=\"color:#6337ff\">Intel</span></h1>", unsafe_allow_html=True)
     st.caption("Competitor Intelligence Engine")
     st.divider()
-    st.markdown("**Track a Competitor**")
-    st.caption("Find app ID from Google Play URL")
-    st.code("details?id=APP_ID_HERE", language=None)
-    new_app_id = st.text_input("", placeholder="e.g. com.spotify.music", label_visibility="collapsed")
-    max_reviews = st.slider("Reviews to analyze", 20, 200, 50)
-    if st.button("⚡ Scrape Reviews", use_container_width=True):
-        if new_app_id:
-            with st.spinner("Fetching reviews..."):
+    st.markdown("**Search for an App**")
+
+    search_query = st.text_input("", placeholder="e.g. Spotify, TikTok, Netflix", label_visibility="collapsed")
+
+    if search_query:
+        with st.spinner("Searching..."):
+            results = search_apps(search_query)
+        if results:
+            st.markdown("**Select an app:**")
+            for app_id, title, score, installs in results:
+                rating_str = f"⭐ {score:.1f}" if score else ""
+                if st.button(f"📱 {title} {rating_str}", key=app_id, use_container_width=True):
+                    st.session_state.selected_to_scrape = (app_id, title)
+                    st.rerun()
+        else:
+            st.warning("No results found. Try a different name.")
+
+    if "selected_to_scrape" in st.session_state:
+        app_id, title = st.session_state.selected_to_scrape
+        st.success(f"Selected: {title}")
+        max_reviews = st.slider("Reviews to analyze", 20, 200, 50)
+        if st.button("⚡ Scrape Reviews", use_container_width=True):
+            with st.spinner(f"Scraping {title}..."):
                 try:
-                    app_name, count = scrape_and_save(new_app_id, max_reviews)
-                    st.success(f"✓ {count} reviews saved for {app_name}")
+                    app_name, count = scrape_and_save(app_id, max_reviews)
+                    st.success(f"✓ {count} reviews saved!")
+                    del st.session_state.selected_to_scrape
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error: {e}")
-        else:
-            st.warning("Enter an app ID first")
+
     apps = get_all_apps()
     if apps:
         st.divider()
         st.markdown("**Tracked Apps**")
         for a in apps:
-            st.markdown(f"<div style='font-size:0.8rem;color:rgba(255,255,255,0.5);padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05);'>📱 {a[1]}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size:0.8rem;padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05);'>📱 {a[1]}</div>", unsafe_allow_html=True)
 
 apps = get_all_apps()
 
 if not apps:
-    st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:2rem;font-weight:800;color:#fff;letter-spacing:-0.03em;'>Competitor Intelligence <span style=\"color:#6337ff\">Engine</span></h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:rgba(255,255,255,0.4);'>Analyze what users hate about your competitors — and build what they're missing</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:2rem;font-weight:800;letter-spacing:-0.03em;'>Competitor Intelligence <span style=\"color:#6337ff\">Engine</span></h1>", unsafe_allow_html=True)
+    st.markdown("<p style='opacity:0.4;'>Analyze what users hate about your competitors — and build what they're missing</p>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     for col, icon, title, desc in [
-        (col1, "🔍", "Scrape Reviews", "Pull hundreds of real user reviews from Google Play in seconds"),
+        (col1, "🔍", "Search by Name", "Just type the app name — no need to find app IDs manually"),
         (col2, "🤖", "AI Analysis", "Groq AI identifies patterns, complaints, and hidden opportunities"),
         (col3, "📊", "Intelligence Report", "Get a strategic report you can act on immediately")
     ]:
         with col:
-            st.markdown(f"<div style='background:rgba(99,55,255,0.08);border:1px solid rgba(99,55,255,0.15);border-radius:12px;padding:1.5rem;'><div style='font-size:1.5rem;margin-bottom:0.8rem;'>{icon}</div><div style='font-family:Syne,sans-serif;font-weight:700;margin-bottom:0.5rem;'>{title}</div><div style='font-size:0.85rem;color:rgba(255,255,255,0.5);'>{desc}</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:rgba(99,55,255,0.08);border:1px solid rgba(99,55,255,0.15);border-radius:12px;padding:1.5rem;'><div style='font-size:1.5rem;margin-bottom:0.8rem;'>{icon}</div><div style='font-family:Syne,sans-serif;font-weight:700;margin-bottom:0.5rem;'>{title}</div><div style='font-size:0.85rem;opacity:0.5;'>{desc}</div></div>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("👈 Add a competitor app in the sidebar to get started")
+    st.info("👈 Search for a competitor app in the sidebar to get started")
 else:
     options = {f"{a[1]}": a[0] for a in apps}
-    st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:2rem;font-weight:800;color:#fff;letter-spacing:-0.03em;'>Intelligence <span style=\"color:#6337ff\">Dashboard</span></h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:rgba(255,255,255,0.4);margin-bottom:1rem;'>Real-time competitor analysis powered by AI</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:2rem;font-weight:800;letter-spacing:-0.03em;'>Intelligence <span style=\"color:#6337ff\">Dashboard</span></h1>", unsafe_allow_html=True)
+    st.markdown("<p style='opacity:0.4;margin-bottom:1rem;'>Real-time competitor analysis powered by AI</p>", unsafe_allow_html=True)
     selected_name = st.selectbox("", list(options.keys()), label_visibility="collapsed")
     selected_id = options[selected_name]
     reviews = get_reviews(selected_id)
@@ -172,7 +180,7 @@ else:
         st.markdown("<br>", unsafe_allow_html=True)
         col_left, col_right = st.columns([1, 1], gap="large")
         with col_left:
-            st.markdown("<div style='font-family:Syne,sans-serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:1rem;'>📊 Rating Breakdown</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-family:Syne,sans-serif;font-weight:700;margin-bottom:1rem;'>📊 Rating Breakdown</div>", unsafe_allow_html=True)
             rating_counts = {}
             for r in reviews:
                 rating = int(r[1] or 0)
@@ -180,16 +188,16 @@ else:
             for stars in [5, 4, 3, 2, 1]:
                 count = rating_counts.get(stars, 0)
                 pct = int(count / total * 100) if total else 0
-                st.markdown(f"<div class='rating-row'><div style='font-size:0.8rem;color:rgba(255,255,255,0.5);width:30px;'>{'⭐'*stars}</div><div class='rating-bar-bg'><div class='rating-bar-fill' style='width:{pct}%'></div></div><div style='font-size:0.75rem;color:rgba(255,255,255,0.3);width:30px;text-align:right;'>{count}</div></div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='rating-row'><div style='font-size:0.8rem;opacity:0.5;width:30px;'>{'⭐'*stars}</div><div class='rating-bar-bg'><div class='rating-bar-fill' style='width:{pct}%'></div></div><div style='font-size:0.75rem;opacity:0.3;width:30px;text-align:right;'>{count}</div></div>", unsafe_allow_html=True)
         with col_right:
-            st.markdown("<div style='font-family:Syne,sans-serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:1rem;'>💬 Recent Reviews</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-family:Syne,sans-serif;font-weight:700;margin-bottom:1rem;'>💬 Recent Reviews</div>", unsafe_allow_html=True)
             for r in reviews[:4]:
                 rating = int(r[1] or 0)
                 text = r[2] or ""
                 st.markdown(f"<div class='review-card'><div class='review-stars'>{'★'*rating}{'☆'*(5-rating)}</div><div class='review-text'>{text[:150]}{'...' if len(text)>150 else ''}</div></div>", unsafe_allow_html=True)
         st.divider()
-        st.markdown("<div style='font-family:Syne,sans-serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:0.5rem;'>🤖 AI Intelligence Report</div>", unsafe_allow_html=True)
-        st.markdown("<div style='color:rgba(255,255,255,0.4);font-size:0.85rem;margin-bottom:1rem;'>Powered by Groq LLaMA 70B — results in under 10 seconds</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-family:Syne,sans-serif;font-weight:700;margin-bottom:0.5rem;'>🤖 AI Intelligence Report</div>", unsafe_allow_html=True)
+        st.markdown("<div style='opacity:0.4;font-size:0.85rem;margin-bottom:1rem;'>Powered by Groq LLaMA 70B — results in under 10 seconds</div>", unsafe_allow_html=True)
         if st.button("⚡ Generate Intelligence Report"):
             review_text = "\n".join([f"Rating {r[1]}/5: {r[2][:250]}" for r in reviews[:80] if r[2]])
             prompt = f"""You are a senior competitive intelligence analyst. Analyze these user reviews for "{selected_name}".

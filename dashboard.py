@@ -1,12 +1,18 @@
 import streamlit as st
-import sqlite3
 import os
 from groq import Groq
 from dotenv import load_dotenv
 from datetime import datetime
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres:efty321EFTY$@db.klnqbtpgdfwlqyubkwnw.supabase.co:5432/postgres")
+
+def get_conn():
+    return psycopg2.connect(DB_URL, sslmode="require")
 
 st.set_page_config(
     page_title="AppIntel — Competitor Intelligence",
@@ -68,19 +74,19 @@ hr { border-color: rgba(255,255,255,0.07) !important; margin: 1.5rem 0 !importan
 
 
 def init_db():
-    conn = sqlite3.connect("reviews.db")
+    conn = get_conn()
     c = conn.cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS reviews (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, app_id TEXT, app_name TEXT,
+        id SERIAL PRIMARY KEY, app_id TEXT, app_name TEXT,
         reviewer TEXT, rating INTEGER, review_text TEXT, date TEXT, scraped_at TEXT)""")
     c.execute("""CREATE TABLE IF NOT EXISTS apps (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, app_id TEXT UNIQUE, app_name TEXT, added_at TEXT)""")
+        id SERIAL PRIMARY KEY, app_id TEXT UNIQUE, app_name TEXT, added_at TEXT)""")
     conn.commit()
     conn.close()
 
 def get_all_apps():
     try:
-        conn = sqlite3.connect("reviews.db")
+        conn = get_conn()
         c = conn.cursor()
         c.execute("SELECT app_id, app_name FROM apps WHERE app_name IS NOT NULL AND app_name != '' AND app_name != 'None' ORDER BY added_at DESC")
         rows = c.fetchall()
@@ -91,9 +97,9 @@ def get_all_apps():
 
 def get_reviews(app_id):
     try:
-        conn = sqlite3.connect("reviews.db")
+        conn = get_conn()
         c = conn.cursor()
-        c.execute("SELECT reviewer, rating, review_text, date FROM reviews WHERE app_id = ? ORDER BY scraped_at DESC LIMIT 200", (app_id,))
+        c.execute("SELECT reviewer, rating, review_text, date FROM reviews WHERE app_id = %s ORDER BY scraped_at DESC LIMIT 200", (app_id,))
         rows = c.fetchall()
         conn.close()
         return rows
@@ -108,15 +114,15 @@ def scrape_and_save(app_id, max_reviews):
     except:
         app_name = app_id
     result, _ = reviews(app_id, lang='en', country='us', sort=Sort.NEWEST, count=max_reviews)
-    conn = sqlite3.connect("reviews.db")
+    conn = get_conn()
     c = conn.cursor()
-    c.execute("INSERT OR IGNORE INTO apps (app_id, app_name, added_at) VALUES (?,?,?)",
+    c.execute("INSERT INTO apps (app_id, app_name, added_at) VALUES (%s,%s,%s) ON CONFLICT (app_id) DO NOTHING",
               (app_id, app_name, datetime.now().isoformat()))
     count = 0
     for r in result:
         text = r.get("content", "")
         if text:
-            c.execute("INSERT INTO reviews (app_id, app_name, reviewer, rating, review_text, date, scraped_at) VALUES (?,?,?,?,?,?,?)",
+            c.execute("INSERT INTO reviews (app_id, app_name, reviewer, rating, review_text, date, scraped_at) VALUES (%s,%s,%s,%s,%s,%s,%s)",
                 (app_id, app_name, r.get("userName",""), r.get("score",0), text, str(r.get("at","")), datetime.now().isoformat()))
             count += 1
     conn.commit()

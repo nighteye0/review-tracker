@@ -1,1 +1,3 @@
 .vercel
+.env
+reviews.db

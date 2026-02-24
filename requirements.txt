@@ -1,7 +1,4 @@
-streamlit
-requests
-beautifulsoup4
-google-play-scraper
-groq
-python-dotenv
-streamlit-analytics2
+Flask==2.3.0
+flask-cors==4.0.0
+requests==2.31.0
+gunicorn==21.2.0

@@ -4,3 +4,4 @@ beautifulsoup4
 google-play-scraper
 groq
 python-dotenv
+streamlit-analytics2

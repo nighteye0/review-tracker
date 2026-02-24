@@ -27,6 +27,7 @@ html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
 """, unsafe_allow_html=True)
 
 def init_db()
+streamlit_analytics.start_tracking()
 streamlit_analytics.start_tracking():
     conn = sqlite3.connect("reviews.db")
     c = conn.cursor()
@@ -106,6 +107,7 @@ def ask_groq(prompt):
         return f"Groq error: {e}"
 
 init_db()
+streamlit_analytics.start_tracking()
 streamlit_analytics.start_tracking()
 
 with st.sidebar:
@@ -236,5 +238,7 @@ Be specific, brutal, and actionable."""
                 rating = int(r[1] or 0)
                 text = r[2] or ""
                 st.markdown(f"<div class='review-card'><div class='review-stars'>{'★'*rating}{'☆'*(5-rating)}</div><div class='review-text'>{text[:300]}</div></div>", unsafe_allow_html=True)
+
+streamlit_analytics.stop_tracking()
 
 streamlit_analytics.stop_tracking()

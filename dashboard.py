@@ -15,343 +15,57 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
-
-/* Base */
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
-    background-color: #0a0a0f;
-    color: #e8e6f0;
-}
-
-/* Hide Streamlit branding */
+html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; background-color: #0a0a0f; color: #e8e6f0; }
 #MainMenu, footer, header {visibility: hidden;}
 .stDeployButton {display: none;}
-
-/* Main background */
-.stApp {
-    background: #0a0a0f;
-    background-image: 
-        radial-gradient(ellipse at 20% 20%, rgba(99, 55, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(255, 55, 130, 0.06) 0%, transparent 50%);
-}
-
-/* Sidebar */
-[data-testid="stSidebar"] {
-    background: #0f0f1a !important;
-    border-right: 1px solid rgba(255,255,255,0.06);
-}
-
-[data-testid="stSidebar"] * {
-    color: #e8e6f0 !important;
-}
-
-/* Sidebar header */
-.sidebar-brand {
-    padding: 1.5rem 0 2rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 1.5rem;
-}
-
-.sidebar-brand h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #fff !important;
-    letter-spacing: -0.02em;
-    margin: 0;
-}
-
-.sidebar-brand span {
-    color: #6337ff !important;
-}
-
-.sidebar-tag {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.4) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 0.3rem;
-}
-
-/* Input fields */
-.stTextInput input {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 8px !important;
-    color: #fff !important;
-    font-family: 'DM Sans', sans-serif !important;
-    padding: 0.6rem 1rem !important;
-}
-
-.stTextInput input:focus {
-    border-color: #6337ff !important;
-    box-shadow: 0 0 0 2px rgba(99,55,255,0.2) !important;
-}
-
-.stTextInput input::placeholder {
-    color: rgba(255,255,255,0.3) !important;
-}
-
-/* Slider */
-.stSlider [data-baseweb="slider"] {
-    padding-top: 0.5rem;
-}
-
-/* Buttons */
-.stButton button {
-    background: linear-gradient(135deg, #6337ff 0%, #9b59ff 100%) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.01em !important;
-    padding: 0.6rem 1.5rem !important;
-    transition: all 0.2s ease !important;
-}
-
-.stButton button:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 8px 24px rgba(99,55,255,0.4) !important;
-}
-
-/* Selectbox */
-.stSelectbox [data-baseweb="select"] {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 8px !important;
-}
-
-.stSelectbox [data-baseweb="select"] * {
-    color: #e8e6f0 !important;
-    background: #0f0f1a !important;
-}
-
-/* Metrics */
-[data-testid="stMetric"] {
-    background: rgba(255,255,255,0.03) !important;
-    border: 1px solid rgba(255,255,255,0.07) !important;
-    border-radius: 12px !important;
-    padding: 1.2rem 1.5rem !important;
-}
-
-[data-testid="stMetricLabel"] {
-    color: rgba(255,255,255,0.5) !important;
-    font-size: 0.75rem !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.08em !important;
-}
-
-[data-testid="stMetricValue"] {
-    color: #fff !important;
-    font-family: 'Syne', sans-serif !important;
-    font-size: 1.8rem !important;
-    font-weight: 700 !important;
-}
-
-[data-testid="stMetricDelta"] {
-    font-size: 0.8rem !important;
-}
-
-/* Expander */
-.streamlit-expanderHeader {
-    background: rgba(255,255,255,0.03) !important;
-    border: 1px solid rgba(255,255,255,0.07) !important;
-    border-radius: 8px !important;
-    color: #e8e6f0 !important;
-}
-
-.streamlit-expanderContent {
-    background: rgba(255,255,255,0.02) !important;
-    border: 1px solid rgba(255,255,255,0.05) !important;
-    border-top: none !important;
-}
-
-/* Divider */
-hr {
-    border-color: rgba(255,255,255,0.07) !important;
-    margin: 1.5rem 0 !important;
-}
-
-/* Success/Error/Warning */
-.stSuccess {
-    background: rgba(0,200,100,0.1) !important;
-    border: 1px solid rgba(0,200,100,0.2) !important;
-    border-radius: 8px !important;
-    color: #00c864 !important;
-}
-
-.stError {
-    background: rgba(255,60,60,0.1) !important;
-    border: 1px solid rgba(255,60,60,0.2) !important;
-    border-radius: 8px !important;
-}
-
-.stWarning {
-    background: rgba(255,180,0,0.1) !important;
-    border: 1px solid rgba(255,180,0,0.2) !important;
-    border-radius: 8px !important;
-}
-
-.stInfo {
-    background: rgba(99,55,255,0.1) !important;
-    border: 1px solid rgba(99,55,255,0.2) !important;
-    border-radius: 8px !important;
-    color: #a888ff !important;
-}
-
-/* Spinner */
-.stSpinner > div {
-    border-top-color: #6337ff !important;
-}
-
-/* Download button */
-.stDownloadButton button {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    color: #e8e6f0 !important;
-}
-
-.stDownloadButton button:hover {
-    background: rgba(255,255,255,0.1) !important;
-    border-color: rgba(255,255,255,0.2) !important;
-    box-shadow: none !important;
-    transform: none !important;
-}
-
-/* Report markdown styling */
-.report-container {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 2rem;
-    margin-top: 1rem;
-}
-
-/* Page title area */
-.page-header {
-    padding: 2rem 0 1rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    margin-bottom: 2rem;
-}
-
-.page-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.03em;
-    margin: 0;
-    line-height: 1.1;
-}
-
-.page-subtitle {
-    color: rgba(255,255,255,0.4);
-    font-size: 0.9rem;
-    margin-top: 0.4rem;
-    font-weight: 300;
-}
-
-.badge {
-    display: inline-block;
-    background: rgba(99,55,255,0.15);
-    border: 1px solid rgba(99,55,255,0.3);
-    color: #a888ff;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-left: 0.5rem;
-    vertical-align: middle;
-}
-
-/* Rating bar */
-.rating-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.rating-label {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.5);
-    width: 30px;
-}
-
-.rating-bar-bg {
-    flex: 1;
-    height: 6px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.rating-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, #6337ff, #9b59ff);
-}
-
-.rating-count {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.3);
-    width: 30px;
-    text-align: right;
-}
-
-/* Review card */
-.review-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.8rem;
-}
-
-.review-stars {
-    color: #f5a623;
-    font-size: 0.8rem;
-    margin-bottom: 0.4rem;
-}
-
-.review-text {
-    color: rgba(255,255,255,0.7);
-    font-size: 0.85rem;
-    line-height: 1.5;
-}
-
-/* Section label */
-.section-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* Stagger animation */
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-up {
-    animation: fadeUp 0.4s ease forwards;
-}
+.stApp { background: #0a0a0f; background-image: radial-gradient(ellipse at 20% 20%, rgba(99, 55, 255, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(255, 55, 130, 0.06) 0%, transparent 50%); }
+[data-testid="stSidebar"] { background: #0f0f1a !important; border-right: 1px solid rgba(255,255,255,0.06); }
+[data-testid="stSidebar"] * { color: #e8e6f0 !important; }
+.sidebar-brand { padding: 1.5rem 0 2rem 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 1.5rem; }
+.sidebar-brand h1 { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff !important; letter-spacing: -0.02em; margin: 0; }
+.sidebar-brand span { color: #6337ff !important; }
+.sidebar-tag { font-size: 0.7rem; color: rgba(255,255,255,0.4) !important; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.3rem; }
+.stTextInput input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px !important; color: #fff !important; font-family: 'DM Sans', sans-serif !important; padding: 0.6rem 1rem !important; }
+.stTextInput input:focus { border-color: #6337ff !important; box-shadow: 0 0 0 2px rgba(99,55,255,0.2) !important; }
+.stTextInput input::placeholder { color: rgba(255,255,255,0.3) !important; }
+.stSlider [data-baseweb="slider"] { padding-top: 0.5rem; }
+.stButton button { background: linear-gradient(135deg, #6337ff 0%, #9b59ff 100%) !important; color: white !important; border: none !important; border-radius: 8px !important; font-family: 'DM Sans', sans-serif !important; font-weight: 500 !important; letter-spacing: 0.01em !important; padding: 0.6rem 1.5rem !important; transition: all 0.2s ease !important; }
+.stButton button:hover { transform: translateY(-1px) !important; box-shadow: 0 8px 24px rgba(99,55,255,0.4) !important; }
+.stSelectbox [data-baseweb="select"] { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px !important; }
+.stSelectbox [data-baseweb="select"] * { color: #e8e6f0 !important; background: #0f0f1a !important; }
+[data-testid="stMetric"] { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.07) !important; border-radius: 12px !important; padding: 1.2rem 1.5rem !important; }
+[data-testid="stMetricLabel"] { color: rgba(255,255,255,0.5) !important; font-size: 0.75rem !important; text-transform: uppercase !important; letter-spacing: 0.08em !important; }
+[data-testid="stMetricValue"] { color: #fff !important; font-family: 'Syne', sans-serif !important; font-size: 1.8rem !important; font-weight: 700 !important; }
+.streamlit-expanderHeader { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.07) !important; border-radius: 8px !important; color: #e8e6f0 !important; }
+.streamlit-expanderContent { background: rgba(255,255,255,0.02) !important; border: 1px solid rgba(255,255,255,0.05) !important; border-top: none !important; }
+hr { border-color: rgba(255,255,255,0.07) !important; margin: 1.5rem 0 !important; }
+.stSuccess { background: rgba(0,200,100,0.1) !important; border: 1px solid rgba(0,200,100,0.2) !important; border-radius: 8px !important; color: #00c864 !important; }
+.stError { background: rgba(255,60,60,0.1) !important; border: 1px solid rgba(255,60,60,0.2) !important; border-radius: 8px !important; }
+.stWarning { background: rgba(255,180,0,0.1) !important; border: 1px solid rgba(255,180,0,0.2) !important; border-radius: 8px !important; }
+.stInfo { background: rgba(99,55,255,0.1) !important; border: 1px solid rgba(99,55,255,0.2) !important; border-radius: 8px !important; color: #a888ff !important; }
+.stSpinner > div { border-top-color: #6337ff !important; }
+.stDownloadButton button { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #e8e6f0 !important; }
+.stDownloadButton button:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.2) !important; box-shadow: none !important; transform: none !important; }
+.report-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 2rem; margin-top: 1rem; }
+.page-header { padding: 2rem 0 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 2rem; }
+.page-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin: 0; line-height: 1.1; }
+.page-subtitle { color: rgba(255,255,255,0.4); font-size: 0.9rem; margin-top: 0.4rem; font-weight: 300; }
+.rating-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.rating-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); width: 30px; }
+.rating-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+.rating-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #6337ff, #9b59ff); }
+.rating-count { font-size: 0.75rem; color: rgba(255,255,255,0.3); width: 30px; text-align: right; }
+.review-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 0.8rem; }
+.review-stars { color: #f5a623; font-size: 0.8rem; margin-bottom: 0.4rem; }
+.review-text { color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; }
+.section-label { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.search-result-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 0.4rem; }
 </style>
 """, unsafe_allow_html=True)
 
-
-# ── Database ──────────────────────────────────────────────────────────────────
 
 def init_db():
     conn = sqlite3.connect("reviews.db")
@@ -368,7 +82,7 @@ def get_all_apps():
     try:
         conn = sqlite3.connect("reviews.db")
         c = conn.cursor()
-        c.execute("SELECT app_id, app_name FROM apps ORDER BY added_at DESC")
+        c.execute("SELECT app_id, app_name FROM apps WHERE app_name IS NOT NULL AND app_name != '' AND app_name != 'None' ORDER BY added_at DESC")
         rows = c.fetchall()
         conn.close()
         return rows
@@ -421,7 +135,6 @@ def ask_groq(prompt):
         return f"Groq error: {e}"
 
 
-# ── Init ──────────────────────────────────────────────────────────────────────
 init_db()
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -433,24 +146,43 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("**Track a Competitor**")
-    st.caption("Find the app ID from Google Play URL")
-    st.code("details?id=APP_ID_HERE", language=None)
+    st.markdown("**Search for an App**")
 
-    new_app_id = st.text_input("", placeholder="e.g. com.spotify.music", label_visibility="collapsed")
+    search_query = st.text_input("", placeholder="e.g. pubg, spotify, netflix", label_visibility="collapsed")
     max_reviews = st.slider("Reviews to analyze", 20, 200, 50)
 
-    if st.button("⚡ Scrape Reviews", use_container_width=True):
-        if new_app_id:
-            with st.spinner("Fetching reviews..."):
+    if st.button("🔍 Search App", use_container_width=True):
+        if search_query:
+            with st.spinner("Searching..."):
                 try:
-                    app_name, count = scrape_and_save(new_app_id, max_reviews)
-                    st.success(f"✓ {count} reviews saved for {app_name}")
-                    st.rerun()
+                    from google_play_scraper import search
+                    results = search(search_query, n_hits=5, lang='en', country='us')
+                    if results:
+                        st.session_state['search_results'] = results
+                    else:
+                        st.warning("No apps found. Try a different name.")
                 except Exception as e:
-                    st.error(f"Error: {e}")
+                    st.error(f"Search error: {e}")
         else:
-            st.warning("Enter an app ID first")
+            st.warning("Enter an app name first")
+
+    if 'search_results' in st.session_state and st.session_state['search_results']:
+        st.markdown("**Select an app:**")
+        for r in st.session_state['search_results']:
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                score = r.get('score') or 0
+                st.markdown(f"<div style='font-size:0.8rem;color:#e8e6f0;padding:0.2rem 0;'>{r['title']} <span style='color:rgba(255,255,255,0.4);'>⭐{score:.1f}</span></div>", unsafe_allow_html=True)
+            with col2:
+                if st.button("Add", key=f"add_{r['appId']}"):
+                    with st.spinner(f"Scraping..."):
+                        try:
+                            app_name, count = scrape_and_save(r['appId'], max_reviews)
+                            st.success(f"✓ {count} reviews saved for {app_name}")
+                            st.session_state['search_results'] = []
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error: {e}")
 
     apps = get_all_apps()
     if apps:
@@ -476,8 +208,8 @@ if not apps:
         st.markdown("""
         <div style="background:rgba(99,55,255,0.08);border:1px solid rgba(99,55,255,0.15);border-radius:12px;padding:1.5rem;">
             <div style="font-size:1.5rem;margin-bottom:0.8rem;">🔍</div>
-            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.5rem;">Scrape Reviews</div>
-            <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);">Pull hundreds of real user reviews from Google Play in seconds</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.5rem;">Search Apps</div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);">Search any app by name — no app ID needed</div>
         </div>
         """, unsafe_allow_html=True)
     with col2:
@@ -491,14 +223,14 @@ if not apps:
     with col3:
         st.markdown("""
         <div style="background:rgba(99,55,255,0.08);border:1px solid rgba(99,55,255,0.15);border-radius:12px;padding:1.5rem;">
-            <div style="font-size:1.5rem;margin-bottom:0.8rem;">📊</div>
-            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.5rem;">Intelligence Report</div>
-            <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);">Get a strategic report you can act on immediately</div>
+            <div style="font-size:1.5rem;margin-bottom:0.8rem;">⚔️</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.5rem;">Compare Apps</div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);">Compare 2-3 competitors head-to-head with AI</div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("👈 Add a competitor app in the sidebar to get started")
+    st.info("👈 Search for a competitor app in the sidebar to get started")
 
 else:
     options = {f"{a[1]}": a[0] for a in apps}
@@ -523,9 +255,7 @@ else:
         avg = sum(ratings) / len(ratings) if ratings else 0
         positive = sum(1 for r in ratings if r >= 4)
         negative = sum(1 for r in ratings if r <= 2)
-        neutral = total - positive - negative
 
-        # Metrics
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Reviews Analyzed", f"{total:,}")
         c2.metric("Avg Rating", f"{avg:.1f} ⭐")
@@ -570,7 +300,6 @@ else:
 
         st.divider()
 
-        # AI Report Section
         st.markdown('<div class="section-label">🤖 AI Intelligence Report</div>', unsafe_allow_html=True)
         st.markdown('<div style="color:rgba(255,255,255,0.4);font-size:0.85rem;margin-bottom:1rem;">Powered by Groq LLaMA 70B — results in under 10 seconds</div>', unsafe_allow_html=True)
 
@@ -680,7 +409,6 @@ Be brutally honest, specific, and actionable. No fluff."""
                                 "negative_pct": int(negative_c/total_c*100)
                             })
 
-                # Show metrics side by side
                 metric_cols = st.columns(len(comparison_metrics))
                 for i, m in enumerate(comparison_metrics):
                     with metric_cols[i]:
@@ -698,7 +426,6 @@ Be brutally honest, specific, and actionable. No fluff."""
 
                 st.markdown("<br>", unsafe_allow_html=True)
 
-                # AI Comparison Report
                 comparison_prompt = f"""You are a senior competitive intelligence analyst. Compare these {len(selected_apps)} apps based on their user reviews and write a sharp head-to-head intelligence report.
 
 {chr(10).join(app_summaries)}

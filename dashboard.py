@@ -166,6 +166,22 @@ with st.sidebar:
         else:
             st.warning("Enter an app name first")
 
+    st.divider()
+    st.markdown("**Or add by App ID**")
+    st.caption("From Google Play URL: details?id=APP_ID")
+    manual_id = st.text_input("", placeholder="e.g. com.whatsapp", label_visibility="collapsed", key="manual_id")
+    if st.button("⚡ Scrape Reviews", use_container_width=True):
+        if manual_id:
+            with st.spinner("Scraping reviews..."):
+                try:
+                    app_name, count = scrape_and_save(manual_id, max_reviews)
+                    st.success(f"✓ {count} reviews saved for {app_name}")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error: {e}")
+        else:
+            st.warning("Enter an app ID first")
+
     if 'search_results' in st.session_state and st.session_state['search_results']:
         st.markdown("**Select an app:**")
         for r in st.session_state['search_results']:

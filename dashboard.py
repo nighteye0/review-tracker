@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit_analytics2 as streamlit_analytics
 import sqlite3
 import os
 from groq import Groq
@@ -25,7 +26,8 @@ html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-def init_db():
+def init_db()
+streamlit_analytics.start_tracking():
     conn = sqlite3.connect("reviews.db")
     c = conn.cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, app_id TEXT, app_name TEXT, reviewer TEXT, rating INTEGER, review_text TEXT, date TEXT, scraped_at TEXT)""")
@@ -104,6 +106,7 @@ def ask_groq(prompt):
         return f"Groq error: {e}"
 
 init_db()
+streamlit_analytics.start_tracking()
 
 with st.sidebar:
     st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:1.4rem;font-weight:800;'>App<span style=\"color:#6337ff\">Intel</span></h1>", unsafe_allow_html=True)
@@ -233,3 +236,5 @@ Be specific, brutal, and actionable."""
                 rating = int(r[1] or 0)
                 text = r[2] or ""
                 st.markdown(f"<div class='review-card'><div class='review-stars'>{'★'*rating}{'☆'*(5-rating)}</div><div class='review-text'>{text[:300]}</div></div>", unsafe_allow_html=True)
+
+streamlit_analytics.stop_tracking()

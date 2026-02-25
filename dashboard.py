@@ -107,14 +107,22 @@ def get_reviews(app_id):
     except:
         return []
 
-def scrape_and_save(app_id, max_reviews):
-    from google_play_scraper import reviews, Sort, app as get_info
+def scrape_and_save(app_name_or_id, max_reviews):
+    from google_play_scraper import reviews, Sort, app as get_info, search
+    # If it looks like an app ID use it directly, otherwise search by name
+    if "." in app_name_or_id:
+        app_id = app_name_or_id
+    else:
+        results = search(app_name_or_id, n_hits=1, lang="en", country="us")
+        if not results:
+            raise Exception(f"No app found for: {app_name_or_id}")
+        app_id = results[0]["appId"]
     try:
-        info = get_info(app_id, lang='en', country='us')
+        info = get_info(app_id, lang="en", country="us")
         app_name = info.get("title", app_id)
     except:
         app_name = app_id
-    result, _ = reviews(app_id, lang='en', country='us', sort=Sort.NEWEST, count=max_reviews)
+    result, _ = reviews(app_id, lang="en", country="us", sort=Sort.NEWEST, count=max_reviews)
     conn = get_conn()
     c = conn.cursor()
     c.execute("INSERT OR IGNORE INTO apps (app_id, app_name, added_at) VALUES (?,?,?)",

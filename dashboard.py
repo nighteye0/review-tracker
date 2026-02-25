@@ -1,7 +1,6 @@
 import streamlit as st
 import streamlit_analytics2 as streamlit_analytics
 import os
-import psycopg2
 from groq import Groq
 from dotenv import load_dotenv
 from datetime import datetime

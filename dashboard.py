@@ -393,6 +393,18 @@ hr { border-color: var(--border) !important; margin: 2rem 0 !important; }
 def init_db():
     pass
 
+def log_event(event_type, data=""):
+    try:
+        supabase.table("analytics_events").insert({"event_type": event_type, "data": str(data)[:200], "created_at": datetime.now().isoformat()}).execute()
+    except: pass
+
+def log_pageview():
+    try:
+        if "pv_logged" not in st.session_state:
+            st.session_state.pv_logged = True
+            supabase.table("analytics_events").insert({"event_type": "pageview", "data": "main", "created_at": datetime.now().isoformat()}).execute()
+    except: pass
+
 def get_all_apps():
     try:
         res = supabase.table("apps").select("app_id,app_name,stores").order("added_at", desc=True).execute()
@@ -664,7 +676,10 @@ else:
         do_search = st.button("Search", use_container_width=True, type="primary")
     st.markdown("</div>", unsafe_allow_html=True)
 
+    log_pageview()
+
     if q and (do_search or len(q) > 2):
+        log_event("search", q)
         with st.spinner("Searching..."):
             results = search_apps_ios(q) if is_ios else search_apps_google(q)
         if results:
@@ -705,6 +720,7 @@ else:
                         name, cnt = scrape_ios(st.session_state.selected_app_id, st.session_state.get("selected_app_slug",""), st.session_state.selected_app_title, max_r)
                     else:
                         name, cnt = scrape_android(st.session_state.selected_app_id, max_r)
+                    log_event("scrape", name)
                     st.success(f"✓ {cnt} reviews saved for {name}")
                     for k in ["selected_app_id","selected_app_title","selected_store","selected_app_slug"]:
                         st.session_state.pop(k,None)
@@ -836,6 +852,7 @@ Structured report with ## sections:
 ## STRATEGIC RECOMMENDATIONS
 ## ONE LINE SUMMARY
 REVIEWS:\n{rt}\nBe specific. Reference actual features.""")
+                log_event("report", sel_name)
                 st.session_state[f"rep_{sel_id}"] = raw
 
             rr = st.session_state.get(f"rep_{sel_id}")
@@ -967,6 +984,7 @@ REVIEWS:\n{rt}\nBe specific. Reference actual features.""")
 ## MARKET OPPORTUNITY
 ## STRATEGIC RECOMMENDATION
 {na} reviews:\n{ta_txt}\n{nb} reviews:\n{tb_txt}\nBe specific. Name exact features.""")
+                        log_event("compare", f"{na} vs {nb}")
                         st.session_state["br_data"] = (raw, na, nb, sa, sb)
 
                     brd = st.session_state.get("br_data")

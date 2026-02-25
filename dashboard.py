@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit_analytics2 as streamlit_analytics
 import os
-import psycopg2
+from supabase import create_client
 from groq import Groq
 from dotenv import load_dotenv
 from datetime import datetime
@@ -9,7 +9,9 @@ import re
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-DATABASE_URL = os.getenv("DATABASE_URL")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 st.set_page_config(page_title="AppIntel", page_icon="🕵️", layout="wide", initial_sidebar_state="collapsed")
 
@@ -259,41 +261,24 @@ hr { border-color: var(--border) !important; margin: 2rem 0 !important; }
 """, unsafe_allow_html=True)
 
 # ── DB ───────────────────────────────────────────────────────────────────────
-def get_conn():
-    return psycopg2.connect(DATABASE_URL)
+
 
 def init_db():
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("""CREATE TABLE IF NOT EXISTS reviews (
-        id SERIAL PRIMARY KEY, app_id TEXT, app_name TEXT,
-        reviewer TEXT, rating INTEGER, review_text TEXT,
-        date TEXT, scraped_at TEXT, store TEXT DEFAULT 'android')""")
-    c.execute("""CREATE TABLE IF NOT EXISTS apps (
-        id SERIAL PRIMARY KEY, app_id TEXT UNIQUE, app_name TEXT,
-        added_at TEXT, stores TEXT DEFAULT 'android')""")
-    try:
-        c.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS store TEXT DEFAULT 'android'")
-        c.execute("ALTER TABLE apps ADD COLUMN IF NOT EXISTS stores TEXT DEFAULT 'android'")
-    except: pass
-    conn.commit(); conn.close()
+    pass
 
 def get_all_apps():
     try:
-        conn = get_conn(); c = conn.cursor()
-        c.execute("SELECT app_id, app_name, stores FROM apps WHERE app_name IS NOT NULL AND app_name != 'None' ORDER BY added_at DESC")
-        rows = c.fetchall(); conn.close(); return rows
-    except: return []
+        res = supabase.table("apps").select("app_id,app_name").order("added_at", desc=True).execute()
+        return [(r["app_id"], r["app_name"]) for r in res.data if r.get("app_name") and r["app_name"] != "None"]
+    except:
+        return []
 
-def get_reviews(app_id, store_filter="all"):
+def get_reviews(app_id, limit="default"):
     try:
-        conn = get_conn(); c = conn.cursor()
-        if store_filter == "all":
-            c.execute("SELECT reviewer, rating, review_text, date, store FROM reviews WHERE app_id = %s ORDER BY scraped_at DESC LIMIT 200", (app_id,))
-        else:
-            c.execute("SELECT reviewer, rating, review_text, date, store FROM reviews WHERE app_id = %s AND store = %s ORDER BY scraped_at DESC LIMIT 200", (app_id, store_filter))
-        rows = c.fetchall(); conn.close(); return rows
-    except: return []
+        res = supabase.table("reviews").select("reviewer,rating,review_text,date").eq("app_id", app_id).limit(200).execute()
+        return [(r["reviewer"], r["rating"], r["review_text"], r["date"]) for r in res.data]
+    except:
+        return []
 
 def search_apps_google(query):
     try:
@@ -320,36 +305,34 @@ def scrape_android(app_id, max_reviews):
         info = get_info(app_id, lang="en", country="us"); app_name = info.get("title") or app_id
     except: app_name = app_id
     result, _ = reviews(app_id, lang="en", country="us", sort=Sort.NEWEST, count=max_reviews)
-    conn = get_conn(); c = conn.cursor()
-    c.execute("""INSERT INTO apps (app_id, app_name, added_at, stores) VALUES (%s,%s,%s,%s)
-                 ON CONFLICT (app_id) DO UPDATE SET app_name=EXCLUDED.app_name, stores=CASE WHEN apps.stores LIKE '%%ios%%' THEN 'both' ELSE 'android' END""",
-              (app_id, app_name, datetime.now().isoformat(), 'android'))
+    supabase.table("apps").upsert({"app_id": app_id, "app_name": app_name, "added_at": datetime.now().isoformat(), "stores": "android"}).execute()
     count = 0
+    rows = []
     for r in result:
         text = r.get("content","")
         if text:
-            c.execute("INSERT INTO reviews (app_id,app_name,reviewer,rating,review_text,date,scraped_at,store) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-                (app_id, app_name, r.get("userName",""), r.get("score",0), text, str(r.get("at","")), datetime.now().isoformat(), "android"))
+            rows.append({"app_id": app_id, "app_name": app_name, "reviewer": r.get("userName",""), "rating": r.get("score",0), "review_text": text, "date": str(r.get("at","")), "scraped_at": datetime.now().isoformat(), "store": "android"})
             count += 1
-    conn.commit(); conn.close(); return app_name, count
+    if rows:
+        supabase.table("reviews").insert(rows).execute()
+    return app_name, count
 
 def scrape_ios(ios_app_id, app_name_slug, app_name, max_reviews):
     from app_store_scraper import AppStore
     app = AppStore(country="us", app_name=app_name_slug, app_id=ios_app_id)
     app.review(how_many=max_reviews)
     db_app_id = f"ios_{ios_app_id}"
-    conn = get_conn(); c = conn.cursor()
-    c.execute("""INSERT INTO apps (app_id, app_name, added_at, stores) VALUES (%s,%s,%s,%s)
-                 ON CONFLICT (app_id) DO UPDATE SET app_name=EXCLUDED.app_name""",
-              (db_app_id, f"{app_name} (iOS)", datetime.now().isoformat(), 'ios'))
+    supabase.table("apps").upsert({"app_id": db_app_id, "app_name": f"{app_name} (iOS)", "added_at": datetime.now().isoformat(), "stores": "ios"}).execute()
     count = 0
+    rows = []
     for r in app.reviews:
         text = r.get("review","")
         if text:
-            c.execute("INSERT INTO reviews (app_id,app_name,reviewer,rating,review_text,date,scraped_at,store) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-                (db_app_id, f"{app_name} (iOS)", r.get("userName",""), r.get("rating",0), text, str(r.get("date","")), datetime.now().isoformat(), "ios"))
+            rows.append({"app_id": db_app_id, "app_name": f"{app_name} (iOS)", "reviewer": r.get("userName",""), "rating": r.get("rating",0), "review_text": text, "date": str(r.get("date","")), "scraped_at": datetime.now().isoformat(), "store": "ios"})
             count += 1
-    conn.commit(); conn.close(); return f"{app_name} (iOS)", count
+    if rows:
+        supabase.table("reviews").insert(rows).execute()
+    return f"{app_name} (iOS)", count
 
 def ask_groq(prompt):
     try:

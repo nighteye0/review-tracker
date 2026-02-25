@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit_analytics2 as streamlit_analytics
 import os
 import psycopg2
 from groq import Groq
@@ -540,7 +539,6 @@ if st.session_state.page == "landing":
 # APP
 # ════════════════════════════════════════════════════════════════════════════
 else:
-    with streamlit_analytics.track():
         c1, c2 = st.columns([6,1])
         with c1:
             st.markdown("<div class='appi-nav'><div class='appi-logo'>App<span style='color:var(--accent)'>Intel</span></div><div class='appi-badge'>Competitive Intelligence</div></div>", unsafe_allow_html=True)

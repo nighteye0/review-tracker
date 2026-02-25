@@ -263,11 +263,8 @@ hr { border-color: var(--border) !important; margin: 2rem 0 !important; }
 # ── DB ───────────────────────────────────────────────────────────────────────
 
 
-def init_db()
-if "page" not in st.session_state:
-    st.session_state.page = "app"
-if "session_data" not in st.session_state:
-    st.session_state.session_data = {}:
+def init_db():
+    pass
     pass
 
 def get_all_apps():
@@ -532,6 +529,10 @@ if st.session_state.page == "landing":
 # ════════════════════════════════════════════════════════════════════════════
 else:
     with streamlit_analytics.track():
+    if "page" not in st.session_state:
+        st.session_state.page = "app"
+    if "session_data" not in st.session_state:
+        st.session_state.session_data = {}
         c1, c2 = st.columns([6,1])
         with c1:
             st.markdown("<div class='appi-nav'><div class='appi-logo'>App<span style='color:var(--accent)'>Intel</span></div><div class='appi-badge'>Competitive Intelligence</div></div>", unsafe_allow_html=True)

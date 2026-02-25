@@ -3,6 +3,5 @@ psycopg2-binary
 groq
 python-dotenv
 google-play-scraper
-app-store-scraper
 requests
 streamlit-analytics2

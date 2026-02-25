@@ -486,10 +486,12 @@ init_db()
 if "page" not in st.session_state:
     st.session_state.page = "landing"
 
+with streamlit_analytics.track():
+
 # ════════════════════════════════════════════════════════════════════════════
 # LANDING
 # ════════════════════════════════════════════════════════════════════════════
-if st.session_state.page == "landing":
+    if st.session_state.page == "landing":
     st.markdown("""
     <div class='appi-nav'>
       <div class='appi-logo'>App<span>Intel</span></div>

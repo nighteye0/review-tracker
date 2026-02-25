@@ -1,12 +1,16 @@
 import streamlit as st
 import os
 from groq import Groq
+from supabase import create_client
 from dotenv import load_dotenv
 from datetime import datetime
 import re
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 st.set_page_config(page_title="AppIntel", page_icon="🕵️", layout="wide", initial_sidebar_state="collapsed")

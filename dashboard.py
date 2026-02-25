@@ -162,58 +162,22 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("**Search for an App**")
+    st.caption("Enter any app name — e.g. pubg, whatsapp, netflix")
 
-    search_query = st.text_input("", placeholder="e.g. pubg, spotify, netflix", label_visibility="collapsed")
+    app_input = st.text_input("App name", placeholder="e.g. pubg, whatsapp, netflix", label_visibility="collapsed")
     max_reviews = st.slider("Reviews to analyze", 20, 200, 50)
 
-    if st.button("🔍 Search App", use_container_width=True):
-        if search_query:
-            with st.spinner("Searching..."):
-                try:
-                    from google_play_scraper import search
-                    results = search(search_query, n_hits=5, lang='en', country='us')
-                    if results:
-                        st.session_state['search_results'] = results
-                    else:
-                        st.warning("No apps found. Try a different name.")
-                except Exception as e:
-                    st.error(f"Search error: {e}")
-        else:
-            st.warning("Enter an app name first")
-
-    st.divider()
-    st.markdown("**Or add by App ID**")
-    st.caption("From Google Play URL: details?id=APP_ID")
-    manual_id = st.text_input("", placeholder="e.g. com.whatsapp", label_visibility="collapsed", key="manual_id")
     if st.button("⚡ Scrape Reviews", use_container_width=True):
-        if manual_id:
-            with st.spinner("Scraping reviews..."):
+        if app_input:
+            with st.spinner(f"Finding and scraping {app_input}..."):
                 try:
-                    app_name, count = scrape_and_save(manual_id, max_reviews)
+                    app_name, count = scrape_and_save(app_input, max_reviews)
                     st.success(f"✓ {count} reviews saved for {app_name}")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error: {e}")
         else:
-            st.warning("Enter an app ID first")
-
-    if 'search_results' in st.session_state and st.session_state['search_results']:
-        st.markdown("**Select an app:**")
-        for r in st.session_state['search_results']:
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                score = r.get('score') or 0
-                st.markdown(f"<div style='font-size:0.8rem;color:#e8e6f0;padding:0.2rem 0;'>{r['title']} <span style='color:rgba(255,255,255,0.4);'>⭐{score:.1f}</span></div>", unsafe_allow_html=True)
-            with col2:
-                if st.button("Add", key=f"add_{r['appId']}"):
-                    with st.spinner(f"Scraping..."):
-                        try:
-                            app_name, count = scrape_and_save(r['appId'], max_reviews)
-                            st.success(f"✓ {count} reviews saved for {app_name}")
-                            st.session_state['search_results'] = []
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"Error: {e}")
+            st.warning("Enter an app name first")
 
     apps = get_all_apps()
     if apps:

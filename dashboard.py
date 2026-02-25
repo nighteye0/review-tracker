@@ -877,3 +877,43 @@ REVIEWS:\n{rt}\nBe specific. Reference actual features.""")
                                     stars=int(r[1] or 0); text=r[2] or ""
                                     sico="🍎" if len(r)>4 and r[4]=="ios" else "🤖"
                                     st.markdown(f"<div class='rev-card'><div class='rev-stars'>{sico} {'★'*stars}{'☆'*(5-stars)}</div><div class='rev-text'>{text[:200]}</div></div>", unsafe_allow_html=True)
+
+    # Pricing page
+    if page == "💎 Pricing":
+        st.markdown("<h1 style='font-family:Syne,sans-serif;font-size:2rem;font-weight:800;'>Simple <span style='color:#6337ff'>Pricing</span></h1>", unsafe_allow_html=True)
+        st.markdown("<p style='opacity:0.5;margin-bottom:2rem;'>Start free, upgrade when ready</p>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2, gap="large")
+        with col1:
+            st.markdown("""
+            <div style='border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;'>
+                <div style='font-size:0.8rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;'>Free</div>
+                <div style='font-size:3rem;font-weight:800;margin-bottom:0.5rem;'>$0</div>
+                <div style='opacity:0.5;margin-bottom:2rem;'>forever</div>
+                <div style='margin-bottom:0.8rem;'>✓ 3 app analyses per month</div>
+                <div style='margin-bottom:0.8rem;'>✓ 50 reviews per app</div>
+                <div style='margin-bottom:0.8rem;'>✓ Basic AI report</div>
+                <div style='margin-bottom:0.8rem;opacity:0.4;'>✗ App comparison</div>
+                <div style='margin-bottom:0.8rem;opacity:0.4;'>✗ Download reports</div>
+                <div style='margin-bottom:0.8rem;opacity:0.4;'>✗ Unlimited reviews</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col2:
+            st.markdown("""
+            <div style='border:2px solid #6337ff;border-radius:16px;padding:2rem;background:rgba(99,55,255,0.05);position:relative;'>
+                <div style='position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#6337ff;color:white;font-size:0.7rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:0.08em;'>MOST POPULAR</div>
+                <div style='font-size:0.8rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;'>Pro</div>
+                <div style='font-size:3rem;font-weight:800;margin-bottom:0.5rem;'>$15</div>
+                <div style='opacity:0.5;margin-bottom:2rem;'>per month in USDT</div>
+                <div style='margin-bottom:0.8rem;'>✓ Unlimited app analyses</div>
+                <div style='margin-bottom:0.8rem;'>✓ 200 reviews per app</div>
+                <div style='margin-bottom:0.8rem;'>✓ Full AI intelligence report</div>
+                <div style='margin-bottom:0.8rem;'>✓ App vs App comparison</div>
+                <div style='margin-bottom:0.8rem;'>✓ Download reports</div>
+                <div style='margin-bottom:0.8rem;'>✓ Priority support</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.link_button("⚡ Subscribe with Crypto — $15/month", "https://nowpayments.io/payment/?iid=4781391207&paymentId=5672693252", use_container_width=True)
+            st.caption("Pay with USDT, BTC, ETH or 300+ cryptocurrencies")

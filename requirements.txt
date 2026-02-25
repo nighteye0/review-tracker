@@ -1,5 +1,4 @@
 streamlit
-psycopg2-binary
 groq
 python-dotenv
 google-play-scraper

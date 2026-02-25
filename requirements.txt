@@ -3,4 +3,4 @@ groq
 python-dotenv
 google-play-scraper
 requests
-supabase# updated
+supabase

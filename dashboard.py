@@ -399,6 +399,14 @@ Reviews:\n{text}\nReturn 8 themes only, most common first."""
             if label: themes.append((label, cnt))
     return themes[:8]
 
+def clean_markdown(text):
+    """Strip markdown bold/italic formatting from text"""
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
+    text = re.sub(r'__(.+?)__', r'\1', text)
+    text = re.sub(r'_(.+?)_', r'\1', text)
+    return text.strip()
+
 def parse_sections(raw):
     sections, cur_title, cur_items = [], None, []
     for line in raw.split("\n"):
@@ -406,11 +414,11 @@ def parse_sections(raw):
         if not line: continue
         if line.startswith("##") or line.startswith("#"):
             if cur_title: sections.append((cur_title, cur_items))
-            cur_title = line.lstrip("#").strip(); cur_items = []
+            cur_title = clean_markdown(line.lstrip("#").strip()); cur_items = []
         elif line.startswith("-") or line.startswith("•") or (len(line)>2 and line[0].isdigit() and line[1] in ".):"):
-            cur_items.append(line.lstrip("-•0123456789.) ").strip())
+            cur_items.append(clean_markdown(line.lstrip("-•0123456789.) ").strip()))
         elif cur_title and line:
-            cur_items.append(line)
+            cur_items.append(clean_markdown(line))
     if cur_title: sections.append((cur_title, cur_items))
     return sections
 
@@ -429,17 +437,18 @@ def render_rating_bars(reviews_data):
         </div>""", unsafe_allow_html=True)
 
 def render_report(sections, score, title, meta=""):
+    # (key_fragment, icon, item_icon, item_bg, item_border, item_color)
     section_cfg = {
-        "SENTIMENT":   ("01", "Overall Sentiment",         "🧠", "→"),
-        "COMPLAINT":   ("02", "Top Complaints",            "⚠️", "⚠️"),
-        "PRAISE":      ("03", "Top Praise Points",         "✓",  "✓"),
-        "OPPORTUNIT":  ("04", "Hidden Opportunities",      "◆",  "◆"),
-        "RECOMMEND":   ("05", "Strategic Recommendations", "→",  "→"),
-        "SUMMARY":     ("06", "One-Line Summary",          "⚡", "→"),
-        "WINNER":      ("01", "Overall Winner",            "🏆", "→"),
-        "WINS":        ("",   "",                          "✓",  "✓"),
-        "WEAKNESS":    ("",   "",                          "⚠️", "⚠️"),
-        "MARKET":      ("",   "Market Opportunity",        "◆",  "◆"),
+        "SENTIMENT":  ("🧠", "→",  "var(--surface2)", "var(--border)",        "var(--text-muted)"),
+        "COMPLAINT":  ("⚠️", "⚠️", "var(--red-dim)",  "var(--red-border)",    "var(--red)"),
+        "PRAISE":     ("✓",  "✓",  "var(--green-dim)","var(--green-border)",  "var(--green)"),
+        "OPPORTUNIT": ("💡", "◆",  "var(--accent-dim)","var(--accent-border)","var(--accent-light)"),
+        "RECOMMEND":  ("🎯", "→",  "var(--surface2)", "var(--border)",        "var(--text-muted)"),
+        "SUMMARY":    ("⚡", "→",  "var(--accent-dim)","var(--accent-border)","var(--accent-light)"),
+        "WINNER":     ("🏆", "→",  "var(--accent-dim)","var(--accent-border)","var(--accent-light)"),
+        "WINS":       ("✓",  "✓",  "var(--green-dim)","var(--green-border)",  "var(--green)"),
+        "WEAKNESS":   ("⚠️", "⚠️", "var(--red-dim)",  "var(--red-border)",    "var(--red)"),
+        "MARKET":     ("💡", "◆",  "var(--accent-dim)","var(--accent-border)","var(--accent-light)"),
     }
     color = score_color(score)
     st.markdown(f"""
@@ -456,16 +465,18 @@ def render_report(sections, score, title, meta=""):
 
     for title_raw, items in sections:
         tu = title_raw.upper()
-        cfg = next((v for k,v in section_cfg.items() if k in tu), ("","",  "→","→"))
-        _, _, sec_icon, item_icon = cfg
+        cfg = next((v for k,v in section_cfg.items() if k in tu),
+                   ("📌", "→", "var(--surface2)", "var(--border)", "var(--text-muted)"))
+        sec_icon, item_icon, item_bg, item_border, item_color = cfg
+
         st.markdown(f"""<div class='report-section'>
           <div class='report-sec-head'><span>{sec_icon}</span>{title_raw}</div>
         """, unsafe_allow_html=True)
         for item in items:
             if item.strip():
-                st.markdown(f"""<div class='report-item'>
-                  <span class='report-item-icon'>{item_icon}</span>
-                  <span>{item}</span>
+                st.markdown(f"""<div class='report-item' style='background:{item_bg};border:1px solid {item_border};'>
+                  <span class='report-item-icon' style='color:{item_color};'>{item_icon}</span>
+                  <span style='color:var(--text);'>{item}</span>
                 </div>""", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 

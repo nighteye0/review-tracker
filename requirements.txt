@@ -1,8 +1,7 @@
-streamlit
-psycopg2-binary
-groq
-python-dotenv
-google-play-scraper
-app-store-scraper
-requests
-
+streamlit==1.40.0
+psycopg2-binary==2.9.9
+groq==0.9.0
+python-dotenv==1.0.0
+google-play-scraper==1.2.7
+app-store-scraper==0.3.0
+requests==2.31.0

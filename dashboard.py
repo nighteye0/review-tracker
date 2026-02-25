@@ -9,7 +9,7 @@ from psycopg2.extras import RealDictCursor
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres:efty321EFTY$@db.klnqbtpgdfwlqyubkwnw.supabase.co:5432/postgres")
+DB_URL = os.getenv("DATABASE_URL") or st.secrets.get("DATABASE_URL", "")
 
 def get_conn():
     return psycopg2.connect(DB_URL, sslmode="require")

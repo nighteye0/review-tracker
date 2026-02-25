@@ -908,5 +908,5 @@ REVIEWS:\n{rt}\nBe specific. Reference actual features.""")
                 </div>
                 """, unsafe_allow_html=True)
                 st.markdown("<br>", unsafe_allow_html=True)
-                st.link_button("⚡ Subscribe — $15/month in Crypto", "https://nowpayments.io/payment/?iid=4781391207&paymentId=5672693252", use_container_width=True)
+                st.link_button("⚡ Subscribe — $15/month in Crypto", "https://nowpayments.io/payment/?iid=4781391207", use_container_width=True)
                 st.caption("Pay with USDT, BTC, ETH or 300+ cryptocurrencies")

@@ -263,7 +263,11 @@ hr { border-color: var(--border) !important; margin: 2rem 0 !important; }
 # ── DB ───────────────────────────────────────────────────────────────────────
 
 
-def init_db():
+def init_db()
+if "page" not in st.session_state:
+    st.session_state.page = "app"
+if "session_data" not in st.session_state:
+    st.session_state.session_data = {}:
     pass
 
 def get_all_apps():
@@ -318,7 +322,7 @@ def scrape_android(app_id, max_reviews):
     return app_name, count
 
 def scrape_ios(ios_app_id, app_name_slug, app_name, max_reviews):
-    from app_store_scraper import AppStore
+    
     app = AppStore(country="us", app_name=app_name_slug, app_id=ios_app_id)
     app.review(how_many=max_reviews)
     db_app_id = f"ios_{ios_app_id}"
@@ -466,6 +470,10 @@ def render_report(sections, score, title, meta=""):
     st.markdown("</div></div>", unsafe_allow_html=True)
 
 init_db()
+if "page" not in st.session_state:
+    st.session_state.page = "app"
+if "session_data" not in st.session_state:
+    st.session_state.session_data = {}
 if "page" not in st.session_state:
     st.session_state.page = "landing"
 

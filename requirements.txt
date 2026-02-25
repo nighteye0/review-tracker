@@ -3,3 +3,4 @@ groq
 python-dotenv
 google-play-scraper
 psycopg2-binary
+streamlit-analytics2

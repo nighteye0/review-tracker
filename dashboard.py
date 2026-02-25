@@ -433,7 +433,10 @@ def scrape_android(app_id, max_reviews):
         info = get_info(app_id, lang="en", country="us"); app_name = info.get("title") or app_id
     except: app_name = app_id
     result, _ = reviews(app_id, lang="en", country="us", sort=Sort.NEWEST, count=max_reviews)
-    supabase.table("apps").upsert({"app_id": app_id, "app_name": app_name, "added_at": datetime.now().isoformat(), "stores": "android"}).execute()
+    try:
+        supabase.table("apps").upsert({"app_id": app_id, "app_name": app_name, "added_at": datetime.now().isoformat(), "stores": "android"}, on_conflict="app_id").execute()
+    except:
+        supabase.table("apps").update({"app_name": app_name, "added_at": datetime.now().isoformat()}).eq("app_id", app_id).execute()
     rows = []
     for r in result:
         text = r.get("content","")
@@ -449,7 +452,10 @@ def scrape_ios(ios_app_id, app_name_slug, app_name, max_reviews):
     resp = requests.get(url, timeout=15)
     data = resp.json()
     entries = data.get("feed",{}).get("entry",[])
-    supabase.table("apps").upsert({"app_id": db_app_id, "app_name": f"{app_name} (iOS)", "added_at": datetime.now().isoformat(), "stores": "ios"}).execute()
+    try:
+        supabase.table("apps").upsert({"app_id": db_app_id, "app_name": f"{app_name} (iOS)", "added_at": datetime.now().isoformat(), "stores": "ios"}, on_conflict="app_id").execute()
+    except:
+        supabase.table("apps").update({"app_name": f"{app_name} (iOS)", "added_at": datetime.now().isoformat()}).eq("app_id", db_app_id).execute()
     rows = []
     for e in entries[:max_reviews]:
         text = e.get("content",{}).get("label","") if isinstance(e.get("content"),dict) else ""

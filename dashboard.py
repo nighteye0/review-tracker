@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit_analytics2 as streamlit_analytics
 import os
 import psycopg2
 from groq import Groq
@@ -540,8 +539,7 @@ if st.session_state.page == "landing":
 # APP
 # ════════════════════════════════════════════════════════════════════════════
 else:
-    streamlit_analytics.start_tracking()
-    c1, c2 = st.columns([6,1])
+        c1, c2 = st.columns([6,1])
     with c1:
         st.markdown("<div class='appi-nav'><div class='appi-logo'>App<span style='color:var(--accent)'>Intel</span></div><div class='appi-badge'>Competitive Intelligence</div></div>", unsafe_allow_html=True)
     with c2:
@@ -895,4 +893,3 @@ REVIEWS:\n{rt}\nBe specific. Reference actual features.""")
                                 sico="🍎" if len(r)>4 and r[4]=="ios" else "🤖"
                                 st.markdown(f"<div class='rev-card'><div class='rev-stars'>{sico} {'★'*stars}{'☆'*(5-stars)}</div><div class='rev-text'>{text[:200]}</div></div>", unsafe_allow_html=True)
 
-streamlit_analytics.stop_tracking()

@@ -3,5 +3,4 @@ groq
 python-dotenv
 google-play-scraper
 requests
-streamlit-analytics2
 supabase
